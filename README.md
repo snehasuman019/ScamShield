@@ -34,8 +34,6 @@ ScamShield aims to address this problem by analyzing job posting information and
 
 The application combines machine learning classification, NLP-based text analysis, an interactive Streamlit interface, and MongoDB integration for database operations.
 
-**Academic Project:** CSE494 – Intelligent NoSQL Databases
-
 ---
 
 ## ✨ Key Features
