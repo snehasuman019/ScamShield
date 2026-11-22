@@ -31,37 +31,13 @@ render_sidebar()
 # Page Header
 render_header(
     title="ScamShield Dashboard",
-    subtitle="AI-Powered Fake Job & Internship Detection System with MongoDB Atlas Integration",
-    badge="CSE494 Project",
+    subtitle="AI-Powered Fake Job & Internship Detection System",
 )
 
 # 1. MongoDB Connection & Status Banner
+# 1. MongoDB Connection
 db = get_db()
 is_conn, conn_msg = check_connection()
-
-if is_conn:
-    st.markdown(
-        f"""
-        <div style="background-color: rgba(13, 148, 136, 0.15); border: 1px solid #0D9488; border-radius: 8px; padding: 10px 16px; margin-bottom: 20px;">
-            <span style="color: #2EC4B6; font-weight: 600;">✓ MongoDB Atlas Connected</span>
-            <span style="color: #94A3B8; margin-left: 10px;">Database: <code>{config.DB_NAME}</code> | Real-time PyMongo Aggregations Enabled</span>
-        </div>
-        """,
-        unsafe_allow_html=True,
-    )
-else:
-    st.markdown(
-        """
-        <div style="background-color: rgba(234, 88, 12, 0.15); border: 1px solid #EA580C; border-radius: 8px; padding: 12px 16px; margin-bottom: 20px;">
-            <span style="color: #FB923C; font-weight: 600;">ℹ MongoDB Atlas Notice:</span>
-            <span style="color: #CBD5E1; margin-left: 6px;">
-                Atlas credentials not configured in <code>.env</code>. The application is operating in local/offline mode.
-                All Machine Learning classification features function locally, while database history persists when Atlas is connected.
-            </span>
-        </div>
-        """,
-        unsafe_allow_html=True,
-    )
 
 # 2. Key Metrics Cards
 counts = get_dashboard_counts(db=db)
