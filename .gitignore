@@ -1,0 +1,27 @@
+# Environment variables and secrets
+.env
+*.env
+.streamlit/secrets.toml
+
+# Python cache and test files
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+
+# Virtual environments
+venv/
+env/
+.venv/
+
+# IDE and operating system files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Dataset (large raw CSV files)
+data/*.csv
+
+# Logs
+*.log
