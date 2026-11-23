@@ -1,27 +1,25 @@
-# Environment variables and secrets
-.env
-*.env
-.streamlit/secrets.toml
-
-# Python cache and test files
+# Python
 __pycache__/
 *.py[cod]
-*$py.class
 .pytest_cache/
 
-# Virtual environments
-venv/
-env/
+# Virtual environment
 .venv/
+venv/
 
-# IDE and operating system files
-.vscode/
-.idea/
-.DS_Store
-Thumbs.db
+# Environment secrets
+.env
+.streamlit/secrets.toml
 
-# Dataset (large raw CSV files)
-data/*.csv
+# Local dataset
+data/fake_job_postings.csv
+
+# Terraform
+.terraform/
+*.tfstate
+*.tfstate.*
+terraform.tfvars
+*.tfplan
 
 # Logs
 *.log
