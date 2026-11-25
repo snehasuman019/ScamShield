@@ -1,0 +1,145 @@
+---
+# ScamShield Deployment Playbook
+# Automates server setup, application deployment, and service management on EC2.
+# Idempotent: safe to run multiple times without breaking anything.
+#
+# Run from WSL Ubuntu:
+#   ansible-playbook playbook.yml
+# Dry run:
+#   ansible-playbook playbook.yml --check
+
+- name: Deploy ScamShield on AWS EC2
+  hosts: scamshield
+  become: true
+  gather_facts: true
+
+  tasks:
+
+    # ------------------------------------------------------------------
+    # 1. System packages
+    # ------------------------------------------------------------------
+    - name: Update apt package cache
+      ansible.builtin.apt:
+        update_cache: true
+        cache_valid_time: 3600
+
+    - name: Install required system packages
+      ansible.builtin.apt:
+        name: "{{ system_packages }}"
+        state: present
+
+    # ------------------------------------------------------------------
+    # 2. Application repository
+    # ------------------------------------------------------------------
+    - name: Clone or update ScamShield repository
+      ansible.builtin.git:
+        repo: "{{ app_repo }}"
+        dest: "{{ app_dir }}"
+        version: "{{ app_branch }}"
+        force: false
+      become: false
+
+    - name: Set correct ownership on application directory
+      ansible.builtin.file:
+        path: "{{ app_dir }}"
+        owner: "{{ app_user }}"
+        group: "{{ app_user }}"
+        recurse: true
+
+    # ------------------------------------------------------------------
+    # 3. Python virtual environment and dependencies
+    # ------------------------------------------------------------------
+    - name: Create Python virtual environment
+      ansible.builtin.command:
+        cmd: python3 -m venv "{{ venv_dir }}"
+        creates: "{{ venv_dir }}/bin/activate"
+      become: false
+
+    - name: Upgrade pip inside virtual environment
+      ansible.builtin.pip:
+        name: pip
+        state: latest
+        virtualenv: "{{ venv_dir }}"
+      become: false
+
+    - name: Install Python dependencies from requirements.txt
+      ansible.builtin.pip:
+        requirements: "{{ app_dir }}/requirements.txt"
+        virtualenv: "{{ venv_dir }}"
+      become: false
+
+    # ------------------------------------------------------------------
+    # 4. Dataset
+    # ------------------------------------------------------------------
+    - name: Check if dataset CSV exists
+      ansible.builtin.stat:
+        path: "{{ app_dir }}/data/fake_job_postings.csv"
+      register: dataset_stat
+
+    - name: Download dataset if not present
+      ansible.builtin.command:
+        cmd: "{{ venv_dir }}/bin/python3 data/download_dataset.py"
+        chdir: "{{ app_dir }}"
+      when: not dataset_stat.stat.exists
+      become: false
+
+    # ------------------------------------------------------------------
+    # 5. Environment configuration
+    # ------------------------------------------------------------------
+    - name: Verify .env file exists (do not overwrite existing secrets)
+      ansible.builtin.stat:
+        path: "{{ app_dir }}/.env"
+      register: env_stat
+
+    - name: Warn if .env is missing
+      ansible.builtin.debug:
+        msg: "WARNING: .env file is missing at {{ app_dir }}/.env — MongoDB will not connect. Create it manually."
+      when: not env_stat.stat.exists
+
+    # ------------------------------------------------------------------
+    # 6. Systemd service
+    # ------------------------------------------------------------------
+    - name: Deploy scamshield systemd service unit
+      ansible.builtin.template:
+        src: templates/scamshield.service.j2
+        dest: /etc/systemd/system/scamshield.service
+        owner: root
+        group: root
+        mode: "0644"
+      notify: Reload systemd and restart scamshield
+
+    - name: Enable and start scamshield service
+      ansible.builtin.systemd:
+        name: scamshield
+        enabled: true
+        state: started
+        daemon_reload: true
+
+    # ------------------------------------------------------------------
+    # 7. Health verification
+    # ------------------------------------------------------------------
+    - name: Wait for Streamlit port 8501 to be available
+      ansible.builtin.wait_for:
+        host: 127.0.0.1
+        port: "{{ app_port }}"
+        timeout: 60
+        state: started
+
+    - name: Confirm scamshield service is active
+      ansible.builtin.command: systemctl is-active scamshield
+      register: service_status
+      changed_when: false
+
+    - name: Show service status
+      ansible.builtin.debug:
+        msg: "ScamShield service status: {{ service_status.stdout }}"
+
+  # ------------------------------------------------------------------
+  # Handlers
+  # ------------------------------------------------------------------
+  handlers:
+    - name: Reload systemd and restart scamshield
+      ansible.builtin.systemd:
+        daemon_reload: true
+        name: scamshield
+        state: restarted

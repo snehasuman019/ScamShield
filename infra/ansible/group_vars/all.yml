@@ -1,0 +1,23 @@
+---
+# ScamShield application variables
+# Non-secret configuration only. MongoDB URI stays in EC2's .env file.
+
+app_name: scamshield
+app_repo: "https://github.com/snehasuman019/ScamShield.git"
+app_branch: main
+app_dir: "/home/ubuntu/ScamShield"
+app_user: ubuntu
+app_port: 8501
+venv_dir: "/home/ubuntu/ScamShield/.venv"
+service_name: scamshield
+
+# System packages required on EC2
+system_packages:
+  - git
+  - python3
+  - python3-venv
+  - python3-pip
+  - python3-dev
+  - build-essential
+  - libssl-dev
+  - libffi-dev
