@@ -93,7 +93,7 @@
 
     - name: Warn if .env is missing
       ansible.builtin.debug:
-        msg: "WARNING: .env file is missing at {{ app_dir }}/.env — MongoDB will not connect. Create it manually."
+        msg: "WARNING: .env file is missing at {{ app_dir }}/.env ï¿½ MongoDB will not connect. Create it manually."
       when: not env_stat.stat.exists
 
     # ------------------------------------------------------------------
