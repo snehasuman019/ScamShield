@@ -1,4 +1,4 @@
-
+﻿
 terraform {
   required_version = ">= 1.5.0"
 
@@ -36,31 +36,31 @@ resource "aws_security_group" "scamshield_sg" {
   name        = "scamshield-security-group"
   description = "Security group for ScamShield"
 
-  # SSH access — restricted to administrator IP only
+  # SSH access â€” restricted to administrator IP only
   ingress {
     description = "SSH access"
     from_port   = 22
     to_port     = 22
     protocol    = "tcp"
-    cidr_blocks = ["117.251.86.146/32"]
+    cidr_blocks = ["49.156.99.26/32"]
   }
 
-  # Streamlit application — restricted to administrator IP only
+  # Streamlit application â€” restricted to administrator IP only
   ingress {
     description = "Streamlit application"
     from_port   = 8501
     to_port     = 8501
     protocol    = "tcp"
-    cidr_blocks = ["117.251.86.146/32"]
+    cidr_blocks = ["49.156.99.26/32"]
   }
 
-  # Nagios web interface — restricted to administrator IP only
+  # Nagios web interface â€” restricted to administrator IP only
   ingress {
     description = "Nagios web interface"
     from_port   = 80
     to_port     = 80
     protocol    = "tcp"
-    cidr_blocks = ["117.251.86.146/32"]
+    cidr_blocks = ["49.156.99.26/32"]
   }
 
   # Allow all outbound traffic (required for apt, pip, MongoDB Atlas, git)
@@ -76,14 +76,14 @@ resource "aws_security_group" "scamshield_sg" {
   }
 }
 
-# EC2 instance — ScamShield application server
+# EC2 instance â€” ScamShield application server
 resource "aws_instance" "scamshield" {
   ami           = data.aws_ami.ubuntu.id
   instance_type = "t3.small"
 
   # key_name must match the key used at instance launch (scamshield-key).
   # SSH access is provided via EC2 Instance Connect using scamshield-key-2.pem.
-  # Do NOT change this value — it would force instance replacement.
+  # Do NOT change this value â€” it would force instance replacement.
   key_name = "scamshield-key"
 
   vpc_security_group_ids = [aws_security_group.scamshield_sg.id]

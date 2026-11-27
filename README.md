@@ -1,4 +1,4 @@
-﻿# ScamShield — AI-Powered Fake Job & Internship Detection System
+# ScamShield — AI-Powered Fake Job & Internship Detection System
 
 <p align="center">
   <strong>Detect Fake Job Postings. Protect Job Seekers.</strong>
@@ -304,5 +304,4 @@ pytest -v
 - Nagios Core: Infrastructure and application monitoring
 
 **Explicitly excluded:**
-- Puppet: Intentionally not implemented for this project
 - Docker, Kubernetes, Jenkins: Not required
